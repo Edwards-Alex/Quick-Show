@@ -1,21 +1,28 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { dummyDateTimeData, dummyShowsData } from '../assets/assets';
 import BlurCircle from '../components/BlurCircle';
 import { Heart, PlayCircleIcon, StarIcon } from 'lucide-react';
 import timeFormat from '../lib/timeFormat';
+import DateSelect from '../components/DateSelect';
+import MovieCard from '../components/MovieCard';
+import Loading from '../components/Loading';
 
 const MovieDetails = () => {
 
   const {id} =  useParams()
   const [show, setShow] = useState(null)
+  const navigate = useNavigate()
 
   const getShow = async() =>{
     const show = dummyShowsData.find(show => show._id === id)
-    setShow({
-      movie: show,
-      dataTime: dummyDateTimeData
-    })
+    if(show){
+      setShow({
+        movie: show,
+        dataTime: dummyDateTimeData
+      })
+    }
+    
   }
 
   //getShow when component first loading
@@ -53,7 +60,7 @@ const MovieDetails = () => {
               <PlayCircleIcon className='w-5 h-5'/>
               Watch Trailer
             </button>
-            <a href="" className='px-10 py-3 text-sm bg-primary hover:bg-primary-dull transition rounded-md
+            <a href="#dateSelect" className='px-10 py-3 text-sm bg-primary hover:bg-primary-dull transition rounded-md
             font-medium cursor-pointer active:scale-95'>Buy Tickets</a>
             <button className='bg-gray-700 p-2.5 rounded-full transition cursor-pointer active:scale-95'>
               <Heart className={`w-5 h-5`}/>
@@ -61,12 +68,43 @@ const MovieDetails = () => {
           </div>
         </div>
       </div>
+      
+      {/* your favorite cast */}
+      <p className='text-lg font-medium mt-20'>Your Favorite Cast</p>
+      {/* list of actors and actress */}
+      <div className='overflow-x-auto no-scrollbar mt-8 pb-4'>
+        <div className='flex items-center gap-4 w-max px-4'>
+          {/* list */}
+          {show.movie.casts.slice(0,12).map((cast, index)=>(
+            <div key={index} className='flex flex-col items-center text-center'>
+              <img src={cast.profile_path} alt="cast_profile" className='rounded-full h-20 md:h-20 aspect-square object-cover'/>
+              <p className='font-medium text-sm mt-3'>{cast.name}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Date Select */}
+      <DateSelect id={id} dateTime={show.dataTime}/>
+
+      <p className='text-lg font-medium mt-20 mb-8'>You May Also Like</p>
+      {/* list of recommond maybe your favorite movies  */}
+      <div className='flex flex-wrap max-sm:justify-center gap-8'>
+          {dummyShowsData.slice(0,4).map((movie, index)=>(
+            <MovieCard key={index} movie={movie} />
+          ))}
+      </div>
+      {/* all movie button */}
+      <div className='flex justify-center mt-20'>
+          <button
+          onClick={()=>{navigate('/movies'),scrollTo(0,0)}}
+          className='px-10 py-3 text-sm bg-primary 
+          hover:bg-primary-dull transition rounded-md font-medium cursor-pointer'>
+            Show more
+          </button>
+      </div>
     </div>
-  ):(
-    <div>
-      Loading...
-    </div>
-  )
+  ):<Loading />
 }
 
 export default MovieDetails
