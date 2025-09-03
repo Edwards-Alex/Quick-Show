@@ -19,7 +19,7 @@ const MovieDetails = () => {
     if(show){
       setShow({
         movie: show,
-        dataTime: dummyDateTimeData
+        dateTime: dummyDateTimeData
       })
     }
     
@@ -85,7 +85,7 @@ const MovieDetails = () => {
       </div>
 
       {/* Date Select */}
-      <DateSelect id={id} dateTime={show.dataTime}/>
+      <DateSelect id={id} dateTime={show.dateTime}/>
 
       <p className='text-lg font-medium mt-20 mb-8'>You May Also Like</p>
       {/* list of recommond maybe your favorite movies  */}
