@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { dummyDateTimeData, dummyShowsData } from '../assets/assets'
+import { assets, dummyDateTimeData, dummyShowsData } from '../assets/assets'
 import Loading from '../components/Loading'
-import {ClockIcon} from 'lucide-react'
+import {ArrowRightIcon, ClockIcon} from 'lucide-react'
 import isoTimeFormat from '../lib/isoTimeFormat'
+import BlurCircle from '../components/BlurCircle'
+import toast from 'react-hot-toast'
 
 const SeatLayout = () => {
+
+  const groupRows = [["A", "B"] , ["C", "D"], ["E", "F"], ["G", "H"], ["I", "J"]]
 
   const {date, id} = useParams()
   const [selectedSeats, setSelectSeats] = useState([])
@@ -23,6 +27,59 @@ const SeatLayout = () => {
     })
     }
   }
+
+  const handleSeatClick = (seatId) => {
+    if (!selectedTime) {
+      return  toast('Please select time first',{
+        style:{
+          padding: '16px 24px',
+          fontSize: '18px',
+          fontWeight: 'bold',
+          color: '#fff',
+          background: '#f87171', 
+          border: '2px solid #b91c1c',
+          borderRadius: '12px',
+        },
+        duration: 4000,
+      })
+    }
+
+    if(!selectedSeats.includes(seatId) && selectedSeats.length > 4){
+      return toast('You can only select 5 seats',{
+        style:{
+          padding: '16px 24px',
+          fontSize: '18px',
+          fontWeight: 'bold',
+          color: '#fff',
+          background: '#f87171', 
+          border: '2px solid #b91c1c',
+          borderRadius: '12px',
+        },
+        duration: 4000,
+      })
+    }
+
+    setSelectSeats(prev => prev.includes(seatId) ? prev.filter(seat => seat !== seatId) : [...prev, seatId])
+  }
+
+  const renderSeats  = (row, count = 9) => (
+    <div className='flex gap-2 mt-2'>
+      <div key={row} className='flex flex-wrap items-center justify-center gap-2'>
+        {Array.from({length: count},(_, i)=>{
+          const seatId  = `${row}${i+1}`;
+          return (
+            <button 
+              key={seatId} 
+              onClick={() => handleSeatClick(seatId)}
+              className={`h-8 w-8 rounded border border-primary/60 cursor-pointer  
+              ${selectedSeats.includes(seatId) && "bg-primary text-white"}`}>
+              {seatId}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
 
   useEffect(()=>{
     getShow()
@@ -49,8 +106,34 @@ const SeatLayout = () => {
          </div>
       </div>
       {/* seats layout */}
-      <div>
-      
+      <div className="relative flex-1 flex flex-col items-center max-md:mt-16">
+            <BlurCircle top='-100px' left='-100px'/>
+            <BlurCircle bottom='0px' right='0px'/>
+            <h1 className='text-2xl font-semibold mb-4'>Select your seat</h1>
+            <img src={assets.screenImage} alt="" />
+            <p className='text-gray-400 text-sm mb-6'>SCREEN SIDE</p>
+
+            {/* seats side */}
+            <div className='flex flex-col items-center mt-10 text-xs text-gray-300'>
+              <div className='grid grid-cols-2 md:grid-cols-1 gap-8 md:gap-2 mb-6'>
+                {groupRows[0].map(row => renderSeats(row))}
+              </div>
+              <div className='grid grid-cols-2 gap-11'>
+                {/* slice(1) deleted ["A","B"] generate new Array then map each other */}
+                {groupRows.slice(1).map((group, index) => (
+                  <div key={index}>
+                    {group.map(row => renderSeats(row))}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* proceed to checkout button*/}
+            <button onClick={()=> navigate('/my-bookings')} className='bg-primary text-sm rounded-full px-10 py-3 mt-20 flex items-center gap-1 hover:bg-primary-dull 
+            transition font-medium cursor-pointer active:scale-95'>
+              proceed to checkout
+              <ArrowRightIcon strokeWidth={3} className='w-4 h-4'/>
+            </button>
       </div>
     </div>
   ) : <Loading />
